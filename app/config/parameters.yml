@@ -1,0 +1,14 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_host: localhost
+    database_port: null
+    database_name: oauth2apitest
+    database_user: jpa
+    database_password: null
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    secret: 0521cd07e4952cab6e4aa6a2706259aeb94ec0c3
+    oauth_client_id: 1_2wpe3v9xqaas888kcgkwgcos8sks8484so4o4w4okw8sg84ssg
+    oauth_client_secret: 587m3z1elsgsck888sgc4googs8kwg0woc4kc8ock0o8socosw

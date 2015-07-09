@@ -1,0 +1,4 @@
+services:
+    user_provider:
+        class: AppBundle\Provider\UserProvider
+        arguments: [@user_repo]

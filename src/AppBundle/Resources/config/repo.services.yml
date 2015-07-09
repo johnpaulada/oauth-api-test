@@ -1,0 +1,7 @@
+services:
+    user_repo:
+        class: AppBundle\Entity\UserRepository
+        factory_service: doctrine.orm.default_entity_manager
+        factory_method: getRepository
+        arguments:
+            - AppBundle\Entity\User
