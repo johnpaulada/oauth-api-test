@@ -8,7 +8,8 @@ The fastest way to implementing OAuth2 in this project is to use a Symfony OAuth
 
 If Composer is already installed, then the FOSOAuthServerBundle can now be installed. To install it we need to:
 
-  1. Add the said bundle on the require portion of `composer.json`:
+### Step 1: Require bundle ###
+Add the said bundle on the require portion of `composer.json`:
 
 ```javascript
 {
@@ -18,18 +19,21 @@ If Composer is already installed, then the FOSOAuthServerBundle can now be insta
     }
 }
 ```
+### Step 2: Install bundle ###
+Run `composer install` and `composer update`.
 
-  2. Run `composer install` and `composer update`.
-
-  3. After that, enable the bundle in `app/AppKernel.php`:
+### Step 3: Enable bundle ###
+After that, enable the bundle in `app/AppKernel.php` by adding `new FOS\OAuthServerBundle\FOSOAuthServerBundle()` in the `registerBundles()` function:
 
 ```php
-  <?php
-    public function registerBundles()
-    {
-      $bundles = array(
-      // ...
-        new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
-      );
-    }
+    <?php
+        public function registerBundles()
+        {
+            $bundles = array(
+                // ...
+                new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
+            );
+        }
+    ?>
 ```
+### Step 4 ###
