@@ -627,5 +627,211 @@ fos_oauth_server:
         user_provider:   user_provider
 ```
 
+## Creating the Client ##
+### Create the Command ###
+
+`src/AppBundle/Command/CreateClientCommand.php`:
+
+```php
+<?php
+
+namespace AppBundle\Command;
+
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class CreateClientCommand extends ContainerAwareCommand
+{
+    protected function configure()
+    {
+        $this
+            ->setName('app:oauth-server:client:create')
+            ->setDescription('Creates a new client')
+            ->addOption(
+                'redirect-uri',
+                null,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Sets redirect uri for client. Use this option multiple times to set multiple redirect URIs.',
+                null
+            )
+            ->addOption(
+                'grant-type',
+                null,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Sets allowed grant type for client. Use this option multiple times to set multiple grant types..',
+                null
+            )
+            ->setHelp(
+                <<<EOT
+                    The <info>%command.name%</info>command creates a new client.
+                    <info>php %command.full_name% [--redirect-uri=...] [--grant-type=...] name</info>
+
+EOT
+            );
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $clientManager = $this->getContainer()->get('fos_oauth_server.client_manager.default');
+        $client = $clientManager->createClient();
+        $client->setRedirectUris($input->getOption('redirect-uri'));
+        $client->setAllowedGrantTypes($input->getOption('grant-type'));
+        $clientManager->updateClient($client);
+        $output->writeln(
+            sprintf(
+                'Added a new client with public id: <info>%s</info>, secret: <info>%s</info>',
+                $client->getPublicId(),
+                $client->getSecret()
+            )
+        );
+    }
+}
+
+?>
+```
+
+### Running the Command ###
+To create a client, just run this command:
+
+```sh
+php app/console app:oauth-server:client:create --redirect-uri="http://localhost/" --grant-type="authorization_code" --grant-type="password" --grant-type="refresh_token" --grant-type="token" --grant-type="client_credentials"
+```
+
+The result will be something like this:
+
+```
+Added a new client with public id: 1_2wpe3v9xqaas888kcgkwgcos8sks8484so4o4w4okw8sg84ssg, secret: 587m3z1elsgsck888sgc4googs8kwg0woc4kc8ock0o8socosw
+```
+
+### Store client credentials ###
+Add the id and secret to `parameters.yml`:
+
+`app/config/parameters.yml`:
+
+```yaml
+# This file is auto-generated during the composer install
+parameters:
+    # ...
+    oauth_client_id: 1_2wpe3v9xqaas888kcgkwgcos8sks8484so4o4w4okw8sg84ssg
+    oauth_client_secret: 587m3z1elsgsck888sgc4googs8kwg0woc4kc8ock0o8socosw
+```
+
+## Create important routes ##
+Use the following code <span> * </span> *<sup>[See <a href="#doc-notes">doc notes</a>]</sup>* to create `SecurityController.php` in `src/AppBundle/Controller` and replace `AppBundle` with whatever the name of your application bundle is:
+
+```php
+<?php
+
+namespace AppBundle\Controller;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+
+class SecurityController extends Controller
+{
+    /**
+     * @Route("/oauth/v2/auth/login", name="oauth_login")
+     */
+    public function oauthLoginAction()
+    {
+
+    }
+
+    /**
+     * @Route("/oauth/v2/auth/login-check", name="oauth_login_check")
+     */
+    public function oauthLoginCheckAction()
+    {
+
+    }
+
+    /**
+     * @Route("/request-token")
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function requestTokenAction(Request $request)
+    {
+        $id     = $this->container->getParameter('oauth_client_id');
+        $secret = $this->container->getParameter('oauth_client_secret');
+
+        $username = $request->query->get('username');
+        $password = $request->query->get('password');
+
+        return $this->redirect($this->generateUrl('fos_oauth_server_token', [
+            'client_id'     => $id,
+            'client_secret' => $secret,
+            'username'      => $username,
+            'password'      => $password,
+            'grant_type'    => 'password'
+        ]));
+    }
+
+    /**
+     * @Route("/refresh-token")
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function refreshTokenAction(Request $request)
+    {
+        $id     = $this->container->getParameter('oauth_client_id');
+        $secret = $this->container->getParameter('oauth_client_secret');
+
+        $token  = $request->query->get('refresh_token');
+
+        return $this->redirect($this->generateUrl('fos_oauth_server_token', [
+            'client_id'     => $id,
+            'client_secret' => $secret,
+            'grant_type'    => 'refresh_token',
+            'refresh_token' => $token
+        ]));
+    }
+
+    // Other actions ...
+
+?>
+```
+
+## Usage ##
+### Getting an access token ###
+In order to get an access token, a GET request must be sent to the `/access_token` endpoint with a user's username and password as parameters. The url can look something like this:
+
+```
+http://example.com/access_token?username=somename&password=somepass
+```
+
+If successful, the response will be an object in JSON format with the following fields:
+
+1. access_token
+2. expires_in
+3. token_type
+4. scope
+5. refresh_token
+
+### Making requests to the API ###
+To make requests, you need an access token (see previous section). If you already have one, you can make requests to the API using the access token as the parameter. The url can look like something like this:
+
+```
+http://example.com/api/user/1?access_token=Zjk1YzNlMmNmNzk2NjBkMGU2NjE1MmM0NDdjZWE3Y2U3Yzg4ZjBkYzZkN2I5ODQ0ODU4YTU2NzUwYTI3YmY3NQ
+```
+
+### Getting another token after expiry ###
+If the current access token expires, the another can be procured by getting the refresh token that came with the access token and sending a GET request `/refresh_token` endpoint with the refresh token as the parameter. The url can look something like this:
+
+```
+http://example.com/refresh_token?refresh_token=OGJiYmFjZDcyNDBkYWFhY2FkM2FjYzMzMDY5N2UxZTkyNDAzMmNmYTk2NzViMjY0NTFmZGNjNzY5ZmNiZmQ0NA
+```
+
+If successful, the response will be an object containing a new access_token and refresh_token -- similar to the response to a request for an access token (see **Getting an access token**).
+
 ## Doc Notes ##
 <a name="doc-notes"></a> <span> * </span> *The `?>` at the last line of the code is not included.*
