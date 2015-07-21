@@ -824,6 +824,11 @@ To make requests, you need an access token (see previous section). If you alread
 http://example.com/api/user/1?access_token=Zjk1YzNlMmNmNzk2NjBkMGU2NjE1MmM0NDdjZWE3Y2U3Yzg4ZjBkYzZkN2I5ODQ0ODU4YTU2NzUwYTI3YmY3NQ
 ```
 
+You can also send an Authorization header like so:
+```
+Authorization: Bearer Zjk1YzNlMmNmNzk2NjBkMGU2NjE1MmM0NDdjZWE3Y2U3Yzg4ZjBkYzZkN2I5ODQ0ODU4YTU2NzUwYTI3YmY3NQ
+```
+
 ### Getting another token after expiry ###
 If the current access token expires, the another can be procured by getting the refresh token that came with the access token and sending a GET request `/refresh_token` endpoint with the refresh token as the parameter. The url can look something like this:
 
