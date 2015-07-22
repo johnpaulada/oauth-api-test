@@ -803,10 +803,10 @@ class SecurityController extends Controller
 
 ## Usage ##
 ### Getting an access token ###
-In order to get an access token, a GET request must be sent to the `/access_token` endpoint with a user's username and password as parameters. The url can look something like this:
+In order to get an access token, a GET request must be sent to the `/oauth/v2/token` endpoint with the client id and secret, a user's username and password, and the `grant_type` set to `password` as parameters. The url can look something like this:
 
 ```
-http://example.com/access_token?username=somename&password=somepass
+http://example.com/oauth/v2/token?client_id=1_1vqhl5u2h9lw4ocwgo84w8c0k488sowgc8og4c8440sg0wosk&client_secret=35nicwwh5fy8gos08gkcs4408wowwogo0cw484k8k8oookwoc&username=john.ada&password=asd123&grant_type=password
 ```
 
 If successful, the response will be an object in JSON format with the following fields:
@@ -830,10 +830,10 @@ Authorization: Bearer Zjk1YzNlMmNmNzk2NjBkMGU2NjE1MmM0NDdjZWE3Y2U3Yzg4ZjBkYzZkN2
 ```
 
 ### Getting another token after expiry ###
-If the current access token expires, the another can be procured by getting the refresh token that came with the access token and sending a GET request `/refresh_token` endpoint with the refresh token as the parameter. The url can look something like this:
+If the current access token expires, the another can be procured by getting the refresh token that came with the access token and sending a GET request `/oauth/v2/token` endpoint with the client id and secret, refresh token and the `grant_type` set to `refresh_token` as the parameter. The url can look something like this:
 
 ```
-http://example.com/refresh_token?refresh_token=OGJiYmFjZDcyNDBkYWFhY2FkM2FjYzMzMDY5N2UxZTkyNDAzMmNmYTk2NzViMjY0NTFmZGNjNzY5ZmNiZmQ0NA
+http://example.com/oauth/v2/token?client_id=1_1vqhl5u2h9lw4ocwgo84w8c0k488sowgc8og4c8440sg0wosk&client_secret=35nicwwh5fy8gos08gkcs4408wowwogo0cw484k8k8oookwoc&grant_type=refresh_token&refresh_token=OGJiYmFjZDcyNDBkYWFhY2FkM2FjYzMzMDY5N2UxZTkyNDAzMmNmYTk2NzViMjY0NTFmZGNjNzY5ZmNiZmQ0NA
 ```
 
 If successful, the response will be an object containing a new access_token and refresh_token -- similar to the response to a request for an access token (see **Getting an access token**).
