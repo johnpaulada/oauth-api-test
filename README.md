@@ -803,10 +803,10 @@ class SecurityController extends Controller
 
 ## Usage ##
 ### Getting an access token ###
-In order to get an access token, a GET request must be sent to the `/oauth/v2/token` endpoint with the client id and secret, a user's username and password, and the `grant_type` set to `password` as parameters. The url can look something like this:
+In order to get an access token, a GET request must be sent to the `/oauth/v2/token` endpoint with the client id and secret, and the `grant_type` set to `client_credentials` as parameters. The url can look something like this:
 
 ```
-http://example.com/oauth/v2/token?client_id=1_1vqhl5u2h9lw4ocwgo84w8c0k488sowgc8og4c8440sg0wosk&client_secret=35nicwwh5fy8gos08gkcs4408wowwogo0cw484k8k8oookwoc&username=john.ada&password=asd123&grant_type=password
+http://example.com/oauth/v2/token?client_id=1_1vqhl5u2h9lw4ocwgo84w8c0k488sowgc8og4c8440sg0wosk&client_secret=35nicwwh5fy8gos08gkcs4408wowwogo0cw484k8k8oookwoc&grant_type=client_credentials
 ```
 
 If successful, the response will be an object in JSON format with the following fields:
@@ -827,6 +827,27 @@ http://example.com/api/user/1?access_token=Zjk1YzNlMmNmNzk2NjBkMGU2NjE1MmM0NDdjZ
 You can also send an Authorization header like so:
 ```
 Authorization: Bearer Zjk1YzNlMmNmNzk2NjBkMGU2NjE1MmM0NDdjZWE3Y2U3Yzg4ZjBkYzZkN2I5ODQ0ODU4YTU2NzUwYTI3YmY3NQ
+```
+
+####For requests that **require login/authentication**####
+You need to have an authentication token in order to make requests that require authentication. To get an authentication token, send a `GET` request to the `/auth-token` endpoint with the user's email and password as parameters. You also need to send the access token along with the request.
+
+#####*Example*#####
+```
+GET    http://local.api.gocambio.com/app_dev.php/auth-token?email=john.ada&password=asd123&access_token=Y2I5MWY1NTBjNDk5MTBjNGJjMGU5NWVmZWIyYjRmZTNmMjA3Y2RjOGE0YmE2NmE2YjAwMDY0ZWE5OGJjYTliYQ
+```
+
+#####*Response*#####
+```
+{
+    "token": "b5cd315c9790c952e7a119503606ca8c7f9a2d7db16ad7f5153b254175bd81da39b533f422b50416b61a7ef8f053cdc54a8e9689bd708841eb0896fcc8885382"
+}
+```
+
+The token in the response is the authentication token, which can be used to make requests that require authentication. To use the token, it must be set as the value of a `GC-Authentication-Token` header, like so:
+
+```
+GC-Authentication-Token: b5cd315c9790c952e7a119503606ca8c7f9a2d7db16ad7f5153b254175bd81da39b533f422b50416b61a7ef8f053cdc54a8e9689bd708841eb0896fcc8885382
 ```
 
 ### Getting another token after expiry ###
